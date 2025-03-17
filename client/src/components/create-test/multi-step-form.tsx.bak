@@ -149,21 +149,19 @@ export default function MultiStepForm() {
   return (
     <Card>
       <CardContent className="pt-6">
-        <h2 className="text-2xl font-bold text-neutral-900 mb-6">Create a New Test</h2>
-        
         {/* Step Progress Indicator */}
-        <div className="flex items-center justify-center mb-8">
+        <div className="flex mb-6">
           {steps.map((s, i) => (
-            <div key={s.id} className="flex-1 relative text-center">
+            <div key={s.id} className="flex-1 relative">
               <div className="flex items-center">
-                <div className={`w-12 h-12 ${step >= s.id ? 'bg-primary text-white' : 'bg-neutral-200 text-neutral-600'} rounded-full flex items-center justify-center font-bold text-lg z-10 mx-auto`}>
+                <div className={`w-8 h-8 ${step >= s.id ? 'bg-primary text-white' : 'bg-neutral-200 text-neutral-700'} rounded-full flex items-center justify-center font-bold text-sm z-10`}>
                   {s.id}
                 </div>
                 {i < steps.length - 1 && (
                   <div className={`flex-1 h-1 ${step > s.id ? 'bg-primary' : 'bg-neutral-200'}`}></div>
                 )}
               </div>
-              <span className={`mt-2 text-sm font-semibold block ${step === s.id ? 'text-primary' : 'text-neutral-600'}`}>
+              <span className={`absolute -left-1 mt-2 text-xs font-semibold ${step >= s.id ? 'text-primary' : 'text-neutral-700'}`}>
                 {s.name}
               </span>
             </div>
@@ -175,27 +173,27 @@ export default function MultiStepForm() {
             {/* Step 1: Grade & Subject */}
             {step === 1 && (
               <div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-6 text-center">Select Your Grade and Subject</h3>
+                <h3 className="text-lg font-bold text-neutral-900 mb-4">Select Your Grade and Subject</h3>
                 
                 {/* Grade Selection */}
-                <div className="mb-8">
+                <div className="mb-6">
                   <FormField
                     control={form.control}
                     name="grade_id"
                     render={() => (
                       <FormItem>
-                        <FormLabel className="block text-neutral-700 font-semibold mb-3">Grade Level</FormLabel>
-                        <div className="grid grid-cols-2 gap-4">
+                        <FormLabel className="block text-neutral-700 font-semibold mb-2">Grade Level</FormLabel>
+                        <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                           {grades.map((grade) => (
                             <Button
                               key={grade.id}
                               type="button"
                               variant="outline"
                               className={cn(
-                                "p-4 rounded-lg text-center h-14 text-lg",
+                                "p-3 border-2 rounded-lg text-center",
                                 form.getValues().grade_id === grade.id 
-                                  ? "bg-blue-200 border-blue-300 text-blue-800 font-semibold" 
-                                  : "bg-blue-100 border-blue-200 hover:bg-blue-200"
+                                  ? "border-primary bg-primary/5 font-semibold text-primary" 
+                                  : "hover:border-primary"
                               )}
                               onClick={() => handleGradeSelect(grade.id)}
                             >
@@ -210,33 +208,33 @@ export default function MultiStepForm() {
                 </div>
                 
                 {/* Subject Selection */}
-                <div className="mb-8">
+                <div className="mb-6">
                   <FormField
                     control={form.control}
                     name="subject_id"
                     render={() => (
                       <FormItem>
-                        <FormLabel className="block text-neutral-700 font-semibold mb-3">Subject</FormLabel>
-                        <div className="grid grid-cols-2 gap-4">
+                        <FormLabel className="block text-neutral-700 font-semibold mb-2">Subject</FormLabel>
+                        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
                           {subjects.map((subject) => (
                             <Button
                               key={subject.id}
                               type="button"
                               variant="outline"
                               className={cn(
-                                "p-4 rounded-lg flex items-center justify-center h-14",
+                                "p-4 border-2 rounded-lg flex items-center",
                                 form.getValues().subject_id === subject.id 
-                                  ? "bg-blue-200 border-blue-300 text-blue-800 font-semibold" 
-                                  : "bg-blue-100 border-blue-200 hover:bg-blue-200"
+                                  ? "border-primary bg-primary/5 text-primary font-semibold" 
+                                  : "hover:border-primary"
                               )}
                               onClick={() => handleSubjectSelect(subject.id)}
                             >
-                              <span className="flex items-center justify-center">
-                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <span className={`w-8 h-8 rounded-full bg-${subject.color}/10 text-${subject.color} flex items-center justify-center mr-3`}>
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
                                 </svg>
-                                <span>{subject.name}</span>
                               </span>
+                              <span>{subject.name}</span>
                             </Button>
                           ))}
                         </div>
@@ -245,25 +243,13 @@ export default function MultiStepForm() {
                     )}
                   />
                 </div>
-                
-                {/* Continue Button */}
-                <div className="flex justify-end">
-                  <Button 
-                    type="button" 
-                    onClick={form.handleSubmit(() => setStep(2))}
-                    className="bg-primary text-white rounded-full px-8 py-2 text-lg"
-                    disabled={!selectedGrade || !selectedSubject}
-                  >
-                    Continue
-                  </Button>
-                </div>
               </div>
             )}
             
             {/* Step 2: Textbook */}
             {step === 2 && (
               <div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-6 text-center">Select Your Textbook</h3>
+                <h3 className="text-lg font-bold text-neutral-900 mb-4">Select Your Textbook</h3>
                 
                 <FormField
                   control={form.control}
@@ -278,10 +264,10 @@ export default function MultiStepForm() {
                               type="button"
                               variant="outline"
                               className={cn(
-                                "p-4 border rounded-lg flex items-center justify-between w-full",
+                                "p-4 border-2 rounded-lg flex items-center justify-between w-full",
                                 form.getValues().textbook_id === textbook.id 
-                                  ? "bg-blue-200 border-blue-300 text-blue-800" 
-                                  : "bg-blue-100 border-blue-200 hover:bg-blue-200"
+                                  ? "border-primary bg-primary/5" 
+                                  : "hover:border-primary"
                               )}
                               onClick={() => handleTextbookSelect(textbook.id, textbook.name)}
                             >
@@ -318,32 +304,13 @@ export default function MultiStepForm() {
                     </FormItem>
                   )}
                 />
-                
-                <div className="flex justify-between mt-8">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => setStep(1)}
-                    className="rounded-full px-6"
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    type="button" 
-                    onClick={form.handleSubmit(() => setStep(3))}
-                    className="bg-primary text-white rounded-full px-8"
-                    disabled={!form.getValues().textbook_id}
-                  >
-                    Continue
-                  </Button>
-                </div>
               </div>
             )}
             
             {/* Step 3: Pages & Content */}
             {step === 3 && (
               <div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-6 text-center">Select Pages & Question Count</h3>
+                <h3 className="text-lg font-bold text-neutral-900 mb-4">Select Pages & Question Count</h3>
                 
                 <div className="space-y-4">
                   <FormField
@@ -353,14 +320,14 @@ export default function MultiStepForm() {
                       <FormItem>
                         <FormLabel>Test Title</FormLabel>
                         <FormControl>
-                          <Input {...field} className="rounded-lg" />
+                          <Input {...field} />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
                   
-                  <div className="grid grid-cols-2 gap-6">
+                  <div className="grid grid-cols-2 gap-4">
                     <FormField
                       control={form.control}
                       name="pages_from"
@@ -374,7 +341,6 @@ export default function MultiStepForm() {
                               max={selectedTextbook?.total_pages || 100}
                               {...field}
                               onChange={e => field.onChange(parseInt(e.target.value))}
-                              className="rounded-lg"
                             />
                           </FormControl>
                           <FormMessage />
@@ -395,7 +361,6 @@ export default function MultiStepForm() {
                               max={selectedTextbook?.total_pages || 100}
                               {...field}
                               onChange={e => field.onChange(parseInt(e.target.value))}
-                              className="rounded-lg"
                             />
                           </FormControl>
                           <FormMessage />
@@ -417,31 +382,23 @@ export default function MultiStepForm() {
                             max={50}
                             {...field}
                             onChange={e => field.onChange(parseInt(e.target.value))}
-                            className="rounded-lg"
                           />
                         </FormControl>
                         <FormMessage />
                       </FormItem>
                     )}
                   />
-                </div>
-                
-                <div className="flex justify-between mt-8">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => setStep(2)}
-                    className="rounded-full px-6"
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    type="button" 
-                    onClick={form.handleSubmit(() => setStep(4))}
-                    className="bg-primary text-white rounded-full px-8"
-                  >
-                    Continue
-                  </Button>
+                  
+                  {selectedTextbook && (
+                    <div className="mt-4 p-4 bg-primary/5 border border-primary/20 rounded-lg">
+                      <p className="text-sm text-neutral-700">
+                        <strong>Selected Textbook:</strong> {selectedTextbook.name}
+                      </p>
+                      <p className="text-sm text-neutral-700">
+                        <strong>Total Pages:</strong> {selectedTextbook.total_pages}
+                      </p>
+                    </div>
+                  )}
                 </div>
               </div>
             )}
@@ -449,22 +406,22 @@ export default function MultiStepForm() {
             {/* Step 4: Scheduling */}
             {step === 4 && (
               <div>
-                <h3 className="text-xl font-bold text-neutral-900 mb-6 text-center">Schedule Your Test</h3>
+                <h3 className="text-lg font-bold text-neutral-900 mb-4">Schedule Your Test</h3>
                 
-                <div className="space-y-6">
+                <div className="space-y-4">
                   <FormField
                     control={form.control}
                     name="exam_date"
                     render={({ field }) => (
                       <FormItem className="flex flex-col">
-                        <FormLabel>Test Date</FormLabel>
+                        <FormLabel>Exam Date</FormLabel>
                         <Popover>
                           <PopoverTrigger asChild>
                             <FormControl>
                               <Button
-                                variant="outline"
+                                variant={"outline"}
                                 className={cn(
-                                  "w-full rounded-lg pl-3 text-left font-normal",
+                                  "w-full pl-3 text-left font-normal",
                                   !field.value && "text-muted-foreground"
                                 )}
                               >
@@ -477,12 +434,14 @@ export default function MultiStepForm() {
                               </Button>
                             </FormControl>
                           </PopoverTrigger>
-                          <PopoverContent className="w-auto p-0" align="center">
+                          <PopoverContent className="w-auto p-0" align="start">
                             <Calendar
                               mode="single"
                               selected={field.value || undefined}
                               onSelect={field.onChange}
-                              disabled={(date) => date < new Date()}
+                              disabled={(date) =>
+                                date < new Date() || date > new Date(new Date().setFullYear(new Date().getFullYear() + 1))
+                              }
                               initialFocus
                             />
                           </PopoverContent>
@@ -502,44 +461,58 @@ export default function MultiStepForm() {
                             type="checkbox"
                             checked={field.value}
                             onChange={field.onChange}
-                            className="h-5 w-5 accent-primary mt-1"
+                            className="h-4 w-4 text-primary rounded focus:ring-primary"
                           />
                         </FormControl>
                         <div className="space-y-1 leading-none">
-                          <FormLabel>
-                            Schedule daily reminders
-                          </FormLabel>
-                          <p className="text-sm text-muted-foreground">
-                            Get daily notifications to help you prepare for this test
+                          <FormLabel>Enable Daily Reminders</FormLabel>
+                          <p className="text-sm text-neutral-600">
+                            You will receive daily reminders to practice this test leading up to your exam date.
                           </p>
                         </div>
                       </FormItem>
                     )}
                   />
-                </div>
-                
-                <div className="flex justify-between mt-8">
-                  <Button 
-                    type="button" 
-                    variant="outline"
-                    onClick={() => setStep(3)}
-                    className="rounded-full px-6"
-                  >
-                    Back
-                  </Button>
-                  <Button 
-                    type="submit" 
-                    className="bg-primary text-white rounded-full px-8"
-                    disabled={createTestMutation.isPending}
-                  >
-                    {createTestMutation.isPending ? (
-                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                    ) : null}
-                    Create Test
-                  </Button>
+                  
+                  <div className="p-4 bg-neutral-50 rounded-lg border border-neutral-200">
+                    <h4 className="font-semibold mb-2">Test Summary</h4>
+                    <ul className="text-sm text-neutral-700 space-y-1">
+                      <li><strong>Title:</strong> {form.getValues().title}</li>
+                      <li><strong>Pages:</strong> {form.getValues().pages_from} to {form.getValues().pages_to}</li>
+                      <li><strong>Questions:</strong> {form.getValues().question_count}</li>
+                      <li>
+                        <strong>Exam Date:</strong> {form.getValues().exam_date 
+                          ? format(form.getValues().exam_date, "PPP") 
+                          : "Not scheduled"}
+                      </li>
+                    </ul>
+                  </div>
                 </div>
               </div>
             )}
+            
+            <div className="flex justify-between mt-6">
+              {step > 1 && (
+                <Button
+                  type="button"
+                  variant="outline"
+                  onClick={() => setStep(step - 1)}
+                >
+                  Back
+                </Button>
+              )}
+              
+              <Button
+                type="submit"
+                className={`${step === 1 ? 'ml-auto' : ''} px-6 py-2 bg-primary text-white font-bold rounded-full hover:bg-primary/90`}
+                disabled={createTestMutation.isPending}
+              >
+                {createTestMutation.isPending ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : null}
+                {step < steps.length ? "Continue" : "Create Test"}
+              </Button>
+            </div>
           </form>
         </Form>
       </CardContent>
