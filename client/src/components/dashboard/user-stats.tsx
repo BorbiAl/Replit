@@ -1,5 +1,5 @@
 
-import { useAuth } from "@/hooks/auth";
+import { useAuth } from "@/hooks/use-auth";
 import { Sparkles } from "lucide-react";
 
 export default function UserStats() {
