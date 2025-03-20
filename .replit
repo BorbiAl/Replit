@@ -14,7 +14,7 @@ localPort = 5000
 externalPort = 80
 
 [workflows]
-runButton = "Dev Server"
+runButton = "Python Server"
 
 [[workflows.workflow]]
 name = "Project"
@@ -48,3 +48,12 @@ mode = "sequential"
 [[workflows.workflow.tasks]]
 task = "shell.exec"
 args = "python server/main.py"
+
+[[workflows.workflow]]
+name = "Python Server"
+author = 40361639
+mode = "sequential"
+
+[[workflows.workflow.tasks]]
+task = "shell.exec"
+args = "python3 server/main.py"
