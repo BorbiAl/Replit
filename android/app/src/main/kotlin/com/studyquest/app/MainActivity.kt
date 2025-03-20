@@ -15,6 +15,8 @@ import com.studyquest.app.ui.dashboard.DashboardScreen
 import com.studyquest.app.ui.theme.StudyQuestTheme
 import com.studyquest.app.ui.tests.TestsScreen
 import com.studyquest.app.ui.duolingo.DuolingoStyleDashboard
+import com.studyquest.app.ui.leaderboard.LeaderboardScreen
+import com.studyquest.app.ui.profile.ProfileScreen
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +38,12 @@ class MainActivity : ComponentActivity() {
                         }
                         composable("tests") {
                             TestsScreen(navController = navController)
+                        }
+                        composable("leaderboard") {
+                            LeaderboardScreen(navController = navController)
+                        }
+                        composable("profile") {
+                            ProfileScreen(navController = navController)
                         }
                     }
                 }

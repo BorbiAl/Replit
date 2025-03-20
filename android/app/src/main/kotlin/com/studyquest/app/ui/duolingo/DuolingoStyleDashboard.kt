@@ -30,7 +30,7 @@ fun DuolingoStyleDashboard(navController: NavController) {
             TopAppBar(
                 title = { Text("StudyQuest") },
                 actions = {
-                    IconButton(onClick = { /* Open profile */ }) {
+                    IconButton(onClick = { navController.navigate("profile") }) {
                         Icon(
                             imageVector = Icons.Default.Person,
                             contentDescription = "Profile",
@@ -61,7 +61,7 @@ fun DuolingoStyleDashboard(navController: NavController) {
                 )
                 NavigationBarItem(
                     selected = false,
-                    onClick = { /* Open leaderboard */ },
+                    onClick = { navController.navigate("leaderboard") },
                     icon = { Icon(Icons.Default.Star, contentDescription = "Leaderboard") },
                     label = { Text("Rank") }
                 )
