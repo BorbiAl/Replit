@@ -3,6 +3,7 @@ package com.studyquest.app.ui.profile
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
@@ -13,61 +14,89 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.NavController
+import com.studyquest.app.devices.DeviceDetector
+import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ProfileScreen(navController: NavController) {
-    val userData = remember {
-        ProfileData(
-            name = "John Doe",
-            username = "john_study",
-            email = "john@example.com",
-            level = 5,
-            xp = 1250,
-            streak = 7,
-            testsCompleted = 24,
-            achievements = listOf(
-                Achievement("Early Bird", "Complete a study session before 8 AM", true),
-                Achievement("Perfectionist", "Score 100% on 5 tests", true),
-                Achievement("Study Buddy", "Complete 20 tests", true),
-                Achievement("Unstoppable", "Maintain a 7-day streak", true),
-                Achievement("Night Owl", "Complete a study session after 10 PM", false),
-                Achievement("Subject Master", "Complete all tests in a subject", false),
-                Achievement("Weekend Warrior", "Study for 4 hours on a weekend", false)
-            )
-        )
+fun ProfileScreen() {
+    val deviceDetector = remember { DeviceDetector.getInstance() }
+    val s24UltraModule = remember { deviceDetector.getS24UltraModule() }
+    
+    // S24 Ultra optimizations
+    LaunchedEffect(Unit) {
+        s24UltraModule?.enableAdaptiveMode()
     }
+    
+    // Check if we have S24 Ultra features
+    val isS24Ultra = remember { s24UltraModule?.isS24Ultra() ?: false }
+    
+    // Student profile data (would come from repository)
+    val studentName = "Alex Johnson"
+    val email = "alex.johnson@example.com"
+    val xpPoints = 6950
+    val level = 8
+    val streakDays = 15
+    val testsCompleted = 21
+    val badges = listOf(
+        Badge("🔥", "15-Day Streak", "Maintained a 15-day streak"),
+        Badge("🥇", "Math Master", "Scored 90%+ on 5 Math tests"),
+        Badge("📚", "Bookworm", "Studied from 10 different textbooks"),
+        Badge("⚡", "Quick Learner", "Completed 3 tests in one day")
+    )
+    
+    val studyStats = listOf(
+        StatItem("Tests Completed", testsCompleted.toString(), Icons.Default.Assignment),
+        StatItem("Average Score", "85%", Icons.Default.Grade),
+        StatItem("Study Hours", "42h", Icons.Default.AccessTime),
+        StatItem("Streak", "$streakDays days", Icons.Default.LocalFireDepartment)
+    )
+    
+    val recentActivity = listOf(
+        ActivityItem(
+            "Completed Physics Quiz",
+            "85% score",
+            LocalDate.now().minusDays(1),
+            Icons.Default.Check
+        ),
+        ActivityItem(
+            "Started Chemistry Review",
+            "In progress",
+            LocalDate.now().minusDays(2),
+            Icons.Default.PlayArrow
+        ),
+        ActivityItem(
+            "Earned Math Master Badge",
+            "Achievement unlocked",
+            LocalDate.now().minusDays(4),
+            Icons.Default.EmojiEvents
+        )
+    )
     
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("My Profile") },
-                colors = TopAppBarDefaults.topAppBarColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    titleContentColor = Color.White
-                ),
-                navigationIcon = {
-                    IconButton(onClick = { navController.popBackStack() }) {
-                        Icon(
-                            imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Back",
-                            tint = Color.White
-                        )
-                    }
+                title = { 
+                    Text(
+                        "Profile",
+                        fontWeight = FontWeight.Bold
+                    )
                 },
                 actions = {
-                    IconButton(onClick = { /* Edit profile */ }) {
-                        Icon(
-                            imageVector = Icons.Default.Edit,
-                            contentDescription = "Edit Profile",
-                            tint = Color.White
-                        )
+                    IconButton(onClick = { /* Open settings */ }) {
+                        Icon(Icons.Default.Settings, contentDescription = "Settings")
                     }
-                }
+                },
+                colors = TopAppBarDefaults.topAppBarColors(
+                    containerColor = MaterialTheme.colorScheme.primaryContainer,
+                    titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+                )
             )
         }
     ) { paddingValues ->
@@ -76,128 +105,88 @@ fun ProfileScreen(navController: NavController) {
                 .fillMaxSize()
                 .padding(paddingValues)
                 .padding(horizontal = 16.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-            contentPadding = PaddingValues(vertical = 16.dp)
+            verticalArrangement = Arrangement.spacedBy(16.dp)
         ) {
-            // Profile Header
+            // Profile header
             item {
-                ProfileHeader(userData)
+                ProfileHeader(name = studentName, email = email, level = level, xp = xpPoints)
             }
             
-            // Stats Section
+            // S24 Ultra specific features
+            if (isS24Ultra) {
+                item {
+                    S24UltraFeatures()
+                }
+            }
+            
+            // Stats section
             item {
                 Text(
-                    text = "My Stats",
-                    fontSize = 20.sp,
+                    "Study Statistics",
                     fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
                 
-                StatsSection(userData)
+                StatsGrid(stats = studyStats)
             }
             
-            // Achievements Section
+            // Badges section
             item {
                 Text(
-                    text = "Achievements",
-                    fontSize = 20.sp,
+                    "Achievements",
                     fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            
+            // Badges grid
+            item {
+                BadgesGrid(badges = badges)
+            }
+            
+            // Recent activity section
+            item {
+                Text(
+                    "Recent Activity",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+            }
+            
+            // Activity items
+            items(recentActivity) { activity ->
+                ActivityCard(activity = activity)
+            }
+            
+            // Settings section
+            item {
+                Text(
+                    "Settings",
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp,
                     modifier = Modifier.padding(top = 8.dp)
                 )
                 
-                AchievementsProgress(
-                    completed = userData.achievements.count { it.unlocked },
-                    total = userData.achievements.size
-                )
+                SettingsSection()
             }
             
-            // Unlocked Achievements
+            // Add some space at the bottom
             item {
-                Text(
-                    text = "Unlocked",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 8.dp)
-                )
-            }
-            
-            // List unlocked achievements
-            userData.achievements.filter { it.unlocked }.forEach { achievement ->
-                item {
-                    AchievementItem(achievement)
-                }
-            }
-            
-            // Locked Achievements
-            item {
-                Text(
-                    text = "Locked",
-                    fontSize = 18.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    modifier = Modifier.padding(top = 16.dp, bottom = 8.dp)
-                )
-            }
-            
-            // List locked achievements
-            userData.achievements.filter { !it.unlocked }.forEach { achievement ->
-                item {
-                    AchievementItem(achievement)
-                }
-            }
-            
-            // Settings and Logout Buttons
-            item {
-                Column(
-                    modifier = Modifier
-                        .fillMaxWidth()
-                        .padding(top = 24.dp, bottom = 16.dp),
-                    horizontalAlignment = Alignment.CenterHorizontally,
-                    verticalArrangement = Arrangement.spacedBy(12.dp)
-                ) {
-                    Button(
-                        onClick = { /* Open settings */ },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.buttonColors(
-                            containerColor = MaterialTheme.colorScheme.primary
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Settings,
-                            contentDescription = "Settings",
-                            modifier = Modifier.size(18.dp)
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Settings")
-                    }
-                    
-                    OutlinedButton(
-                        onClick = { navController.navigate("auth") },
-                        modifier = Modifier.fillMaxWidth(),
-                        colors = ButtonDefaults.outlinedButtonColors(
-                            contentColor = MaterialTheme.colorScheme.error
-                        )
-                    ) {
-                        Icon(
-                            imageVector = Icons.Default.Logout,
-                            contentDescription = "Logout",
-                            modifier = Modifier.size(18.dp),
-                            tint = MaterialTheme.colorScheme.error
-                        )
-                        Spacer(modifier = Modifier.width(8.dp))
-                        Text("Logout", color = MaterialTheme.colorScheme.error)
-                    }
-                }
+                Spacer(modifier = Modifier.height(16.dp))
             }
         }
     }
 }
 
 @Composable
-fun ProfileHeader(userData: ProfileData) {
+fun ProfileHeader(name: String, email: String, level: Int, xp: Int) {
     Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 4.dp),
-        shape = RoundedCornerShape(16.dp)
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp)
     ) {
         Column(
             modifier = Modifier
@@ -205,6 +194,7 @@ fun ProfileHeader(userData: ProfileData) {
                 .padding(16.dp),
             horizontalAlignment = Alignment.CenterHorizontally
         ) {
+            // Avatar
             Box(
                 modifier = Modifier
                     .size(80.dp)
@@ -213,231 +203,283 @@ fun ProfileHeader(userData: ProfileData) {
                 contentAlignment = Alignment.Center
             ) {
                 Text(
-                    text = userData.name.first().toString(),
-                    color = Color.White,
+                    text = name.first().toString(),
+                    color = MaterialTheme.colorScheme.onPrimary,
                     fontSize = 36.sp,
                     fontWeight = FontWeight.Bold
                 )
             }
             
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Name
             Text(
-                text = userData.name,
-                fontSize = 24.sp,
+                text = name,
                 fontWeight = FontWeight.Bold,
-                modifier = Modifier.padding(top = 12.dp)
+                fontSize = 24.sp
             )
             
+            // Email
             Text(
-                text = "@${userData.username}",
-                fontSize = 16.sp,
-                color = Color.Gray
+                text = email,
+                fontSize = 14.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp),
-                horizontalArrangement = Arrangement.SpaceEvenly
-            ) {
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Level",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "${userData.level}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.primary
-                    )
-                }
-                
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "XP",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Text(
-                        text = "${userData.xp}",
-                        fontSize = 22.sp,
-                        fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
-                }
-                
-                Column(
-                    horizontalAlignment = Alignment.CenterHorizontally
-                ) {
-                    Text(
-                        text = "Streak",
-                        fontSize = 14.sp,
-                        color = Color.Gray
-                    )
-                    Row(
-                        verticalAlignment = Alignment.CenterVertically
-                    ) {
-                        Text(
-                            text = "🔥",
-                            fontSize = 16.sp
-                        )
-                        Text(
-                            text = "${userData.streak}",
-                            fontSize = 22.sp,
-                            fontWeight = FontWeight.Bold,
-                            color = MaterialTheme.colorScheme.tertiary
-                        )
-                    }
-                }
-            }
-        }
-    }
-}
-
-@Composable
-fun StatsSection(userData: ProfileData) {
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
-            StatItem(
-                icon = Icons.Default.CheckCircle,
-                label = "Tests Completed",
-                value = "${userData.testsCompleted}",
-                color = MaterialTheme.colorScheme.primary
-            )
+            Spacer(modifier = Modifier.height(16.dp))
             
-            Divider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                color = Color.LightGray.copy(alpha = 0.5f)
-            )
-            
-            StatItem(
-                icon = Icons.Default.EmojiEvents,
-                label = "Current Streak",
-                value = "${userData.streak} days",
-                color = MaterialTheme.colorScheme.tertiary
-            )
-            
-            Divider(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(vertical = 12.dp),
-                color = Color.LightGray.copy(alpha = 0.5f)
-            )
-            
-            StatItem(
-                icon = Icons.Default.Star,
-                label = "Total XP",
-                value = "${userData.xp}",
-                color = MaterialTheme.colorScheme.secondary
-            )
-        }
-    }
-}
-
-@Composable
-fun StatItem(icon: androidx.compose.ui.graphics.vector.ImageVector, label: String, value: String, color: Color) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(
-            imageVector = icon,
-            contentDescription = label,
-            tint = color,
-            modifier = Modifier.size(24.dp)
-        )
-        
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .padding(start = 16.dp)
-        ) {
-            Text(
-                text = label,
-                fontSize = 16.sp
-            )
-        }
-        
-        Text(
-            text = value,
-            fontSize = 18.sp,
-            fontWeight = FontWeight.Bold,
-            color = color
-        )
-    }
-}
-
-@Composable
-fun AchievementsProgress(completed: Int, total: Int) {
-    val progress = completed.toFloat() / total
-    
-    Card(
-        modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp),
-        shape = RoundedCornerShape(16.dp)
-    ) {
-        Column(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(16.dp)
-        ) {
+            // Level and XP
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
+                horizontalArrangement = Arrangement.Center,
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Text(
-                    text = "Progress",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Medium
+                Icon(
+                    imageVector = Icons.Default.EmojiEvents,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary
                 )
-                
-                Text(
-                    text = "$completed of $total",
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = MaterialTheme.colorScheme.primary
-                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Column {
+                    Text(
+                        text = "Level $level",
+                        fontWeight = FontWeight.Bold,
+                        fontSize = 16.sp
+                    )
+                    Text(
+                        text = "$xp XP",
+                        fontSize = 14.sp
+                    )
+                }
             }
             
-            LinearProgressIndicator(
-                progress = progress,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(8.dp)
-                    .clip(RoundedCornerShape(4.dp))
-                    .padding(top = 8.dp),
-                color = MaterialTheme.colorScheme.primary,
-                trackColor = Color.LightGray
-            )
+            Spacer(modifier = Modifier.height(16.dp))
+            
+            // Edit profile button
+            Button(
+                onClick = { /* Edit profile */ },
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                Icon(
+                    imageVector = Icons.Default.Edit,
+                    contentDescription = null,
+                    modifier = Modifier.size(16.dp)
+                )
+                Spacer(modifier = Modifier.width(8.dp))
+                Text("Edit Profile")
+            }
         }
     }
 }
 
 @Composable
-fun AchievementItem(achievement: Achievement) {
+fun S24UltraFeatures() {
     Card(
         modifier = Modifier.fillMaxWidth(),
-        elevation = CardDefaults.cardElevation(defaultElevation = 1.dp),
-        shape = RoundedCornerShape(12.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (achievement.unlocked) MaterialTheme.colorScheme.surface else Color.LightGray.copy(alpha = 0.2f)
+            containerColor = MaterialTheme.colorScheme.secondaryContainer
         )
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalAlignment = Alignment.CenterHorizontally
+        ) {
+            Text(
+                text = "Samsung S24 Ultra Features",
+                fontWeight = FontWeight.Bold,
+                fontSize = 16.sp,
+                color = MaterialTheme.colorScheme.onSecondaryContainer
+            )
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.SpaceEvenly
+            ) {
+                // S Pen feature
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Edit,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "S Pen Ready",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                
+                // Enhanced display
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Visibility,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Enhanced UI",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+                
+                // Performance boost
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally
+                ) {
+                    Icon(
+                        imageVector = Icons.Default.Speed,
+                        contentDescription = null,
+                        tint = MaterialTheme.colorScheme.onSecondaryContainer,
+                        modifier = Modifier.size(24.dp)
+                    )
+                    Text(
+                        text = "Performance Boost",
+                        fontSize = 14.sp,
+                        color = MaterialTheme.colorScheme.onSecondaryContainer
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatsGrid(stats: List<StatItem>) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                stats.take(2).forEach { stat ->
+                    StatCard(
+                        stat = stat,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+            
+            Spacer(modifier = Modifier.height(8.dp))
+            
+            Row(
+                modifier = Modifier.fillMaxWidth()
+            ) {
+                stats.takeLast(2).forEach { stat ->
+                    StatCard(
+                        stat = stat,
+                        modifier = Modifier.weight(1f)
+                    )
+                }
+            }
+        }
+    }
+}
+
+@Composable
+fun StatCard(stat: StatItem, modifier: Modifier = Modifier) {
+    Box(
+        modifier = modifier.padding(4.dp)
+    ) {
+        Card(
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(12.dp),
+                horizontalAlignment = Alignment.CenterHorizontally
+            ) {
+                Icon(
+                    imageVector = stat.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.size(24.dp)
+                )
+                
+                Spacer(modifier = Modifier.height(4.dp))
+                
+                Text(
+                    text = stat.value,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+                
+                Text(
+                    text = stat.name,
+                    fontSize = 12.sp,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
+        }
+    }
+}
+
+@Composable
+fun BadgesGrid(badges: List<Badge>) {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp),
+            horizontalArrangement = Arrangement.SpaceEvenly
+        ) {
+            badges.forEach { badge ->
+                BadgeItem(badge = badge)
+            }
+        }
+    }
+}
+
+@Composable
+fun BadgeItem(badge: Badge) {
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
+        // Badge icon
+        Text(
+            text = badge.emoji,
+            fontSize = 32.sp
+        )
+        
+        Spacer(modifier = Modifier.height(4.dp))
+        
+        // Badge name
+        Text(
+            text = badge.name,
+            fontWeight = FontWeight.Medium,
+            fontSize = 12.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.width(80.dp)
+        )
+    }
+}
+
+@Composable
+fun ActivityCard(activity: ActivityItem) {
+    val dateFormatter = DateTimeFormatter.ofPattern("MMM dd")
+    
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 4.dp)
     ) {
         Row(
             modifier = Modifier
@@ -445,48 +487,141 @@ fun AchievementItem(achievement: Achievement) {
                 .padding(16.dp),
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Icon(
-                imageVector = if (achievement.unlocked) Icons.Default.EmojiEvents else Icons.Default.Lock,
-                contentDescription = if (achievement.unlocked) "Achievement Unlocked" else "Achievement Locked",
-                tint = if (achievement.unlocked) MaterialTheme.colorScheme.tertiary else Color.Gray,
-                modifier = Modifier.size(24.dp)
-            )
+            // Activity icon
+            Box(
+                modifier = Modifier
+                    .size(40.dp)
+                    .clip(CircleShape)
+                    .background(MaterialTheme.colorScheme.primaryContainer),
+                contentAlignment = Alignment.Center
+            ) {
+                Icon(
+                    imageVector = activity.icon,
+                    contentDescription = null,
+                    tint = MaterialTheme.colorScheme.onPrimaryContainer
+                )
+            }
+            
+            Spacer(modifier = Modifier.width(16.dp))
             
             Column(
-                modifier = Modifier
-                    .weight(1f)
-                    .padding(start = 16.dp)
+                modifier = Modifier.weight(1f)
             ) {
                 Text(
-                    text = achievement.title,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.SemiBold,
-                    color = if (achievement.unlocked) Color.Unspecified else Color.Gray
+                    text = activity.title,
+                    fontWeight = FontWeight.Medium,
+                    fontSize = 16.sp
                 )
                 
                 Text(
-                    text = achievement.description,
+                    text = activity.description,
                     fontSize = 14.sp,
-                    color = Color.Gray
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
+            
+            Text(
+                text = activity.date.format(dateFormatter),
+                fontSize = 12.sp,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
     }
 }
 
-data class ProfileData(
+@Composable
+fun SettingsSection() {
+    Card(
+        modifier = Modifier.fillMaxWidth()
+    ) {
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(16.dp)
+        ) {
+            SettingsItem(
+                title = "Notifications",
+                icon = Icons.Default.Notifications,
+                onClick = { /* Open notifications settings */ }
+            )
+            
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            SettingsItem(
+                title = "Dark Mode",
+                icon = Icons.Default.DarkMode,
+                onClick = { /* Toggle dark mode */ }
+            )
+            
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            SettingsItem(
+                title = "Privacy",
+                icon = Icons.Default.Lock,
+                onClick = { /* Open privacy settings */ }
+            )
+            
+            Divider(modifier = Modifier.padding(vertical = 8.dp))
+            
+            SettingsItem(
+                title = "Help & Support",
+                icon = Icons.Default.Help,
+                onClick = { /* Open help */ }
+            )
+        }
+    }
+}
+
+@Composable
+fun SettingsItem(
+    title: String,
+    icon: ImageVector,
+    onClick: () -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .padding(vertical = 8.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(
+            imageVector = icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary
+        )
+        
+        Spacer(modifier = Modifier.width(16.dp))
+        
+        Text(
+            text = title,
+            fontSize = 16.sp,
+            modifier = Modifier.weight(1f)
+        )
+        
+        Icon(
+            imageVector = Icons.Default.ChevronRight,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.onSurfaceVariant
+        )
+    }
+}
+
+// Data classes
+data class Badge(
+    val emoji: String,
     val name: String,
-    val username: String,
-    val email: String,
-    val level: Int,
-    val xp: Int,
-    val streak: Int,
-    val testsCompleted: Int,
-    val achievements: List<Achievement>
+    val description: String
 )
 
-data class Achievement(
+data class StatItem(
+    val name: String,
+    val value: String,
+    val icon: ImageVector
+)
+
+data class ActivityItem(
     val title: String,
     val description: String,
-    val unlocked: Boolean
+    val date: LocalDate,
+    val icon: ImageVector
 )
